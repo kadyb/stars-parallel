@@ -1497,18 +1497,18 @@ border-radius: 0px;
 </div>
 
 
-<pre class="r"><code>library(&quot;stars&quot;)
-set.seed(1) # define a random seed</code></pre>
 <p>Prediction on large datasets can be time-consuming, but with enough
 computing power, this task can be parallelized easily. Some algorithms
 provide native multithreading like <code>predict()</code> function in
-<code>{ranger}</code> package (but this is not standard). In this
+the <code>{ranger}</code> package (but this is not standard). In this
 situation, we have to parallelize the calculations ourselves. There are
 several approaches to do this, but for this example we will divide a
 large out of memory raster into smaller blocks and make predictions
 using multithreading.</p>
 <div id="data-loading" class="section level2">
 <h2>Data loading</h2>
+<pre class="r"><code>library(&quot;stars&quot;)
+set.seed(1) # define a random seed</code></pre>
 <p>The first step is to list the rasters representing the blue (B2),
 green (B3), red (B4), and near infrared (B5) bands to be loaded using
 the <code>list.files()</code> function. We need to define two additional
@@ -1525,8 +1525,8 @@ files</code></pre>
 do this, we use the <code>read_stars()</code> function with the
 arguments <code>proxy = TRUE</code> and <code>along = 3</code>. This
 second argument will cause the bands (layers) to be combined into a
-three-dimensional matrix: $ [longitude,  latitude,  spectral  band]
-$.</p>
+three-dimensional matrix: <span class="math inline">\([longitude, \
+latitude, \ spectral \ band]\)</span>.</p>
 <pre class="r"><code>rasters = read_stars(files, proxy = TRUE, along = 3)</code></pre>
 <p>We can replace the default filenames with band names, and rename the
 third dimension as follows:</p>
@@ -1544,7 +1544,15 @@ shown below:</p>
 smp = st_sample(bbox, size = 20000) # sample points from the extent of the polygon
 smp = st_extract(rasters, smp) # extract the pixel values for those points
 smp = st_drop_geometry(st_as_sf(smp)) # convert to a data frame (remove geometry)
-smp = na.omit(smp) # remove missing values (NA)</code></pre>
+smp = na.omit(smp) # remove missing values (NA)
+head(smp)</code></pre>
+<pre><code>##   Blue Green   Red   NIR
+## 1 9908 11349 11862 19186
+## 2 8187  9252  8641 21080
+## 3 9377 10576 10837 15875
+## 6 9264 10154 10422 13587
+## 8 7571  8276  8065 11121
+## 9 8090  8799  8162 20219</code></pre>
 </div>
 <div id="modelling" class="section level2">
 <h2>Modelling</h2>
@@ -1652,12 +1660,12 @@ tifs = foreach(i = seq_len(nrow(tiles)), .packages = packages) %dopar% {
   save_path = file.path(tempdir(), paste0(&quot;tile_&quot;, i, &quot;.tif&quot;))
   write_stars(pr, save_path, NA_value = 0, options = &quot;COMPRESS=NONE&quot;,
               type = &quot;Byte&quot;, chunk_size = dim(tile))
-  save_path
+  return(save_path)
 }
 
 end_time_2 = difftime(Sys.time(), start_time, units = &quot;secs&quot;)
 end_time_2 = round(end_time_2)</code></pre>
-<p>The prediction took 248 seconds. By using three threads instead of
+<p>The prediction took 264 seconds. By using three threads instead of
 one, we have cut the operation time by half!</p>
 </div>
 </div>
