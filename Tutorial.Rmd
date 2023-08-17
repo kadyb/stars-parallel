@@ -1,5 +1,5 @@
 ---
-title: "Parallel raster processing in **stars**"
+title: "Parallel raster processing in *stars*"
 author: "Krzysztof Dyba"
 output:
   html_document:
@@ -51,6 +51,15 @@ bands = c("Blue", "Green", "Red", "NIR")
 # rename bands and dimension
 rasters = st_set_dimensions(rasters, 3, values = bands, names = "band")
 names(rasters) = "Landsat" # rename the object
+```
+
+Using the default `plot()` function, we can display our four bands separately.
+By specifying the `rgb` argument, we can create a three-band composition,
+such as RGB or CIR (including near infrared). It is also useful to use the
+`downsample` argument to display the image at a lower resolution.
+
+```{r}
+plot(rasters, rgb = c(3, 2, 1), downsample = 10, main = "RGB composition")
 ```
 
 ## Sampling
