@@ -16,6 +16,22 @@ ourselves. There are several approaches to do this, but for this example we will
 divide a large out of memory raster into smaller blocks and make predictions
 using multithreading.
 
+## Data acquisition
+
+We will use the Landsat 8 satellite scene with four spectral bands as an example
+for analysis. It covers a range of 37,000 km$^2$ and consists of over 62 million
+pixels. The data is available on [Zenodo](https://zenodo.org/record/8260938).
+
+We can use the `download.file()` function to download the data and then unpack the
+*.zip* archive using the `unzip()` function.
+
+```{r message=FALSE}
+options(timeout = 600) # increase connection timeout
+url = "https://zenodo.org/record/8260938/files/Landsat.zip"
+download.file(url, "Landsat.zip")
+unzip("Landsat.zip")
+```
+
 ## Data loading
 
 ```{r message=FALSE}
@@ -65,7 +81,7 @@ plot(rasters, rgb = c(3, 2, 1), downsample = 10, main = "RGB composition")
 ## Sampling
 
 For modeling, we need to use a smaller sample rather than the entire dataset.
-Drawing training points consists of several steps, which are shown below:
+Sampling training points consists of several steps, which are shown below:
 
 ```{r}
 bbox = st_as_sfc(st_bbox(rasters)) # define a bounding box
@@ -225,5 +241,5 @@ clustering = read_stars("predict.tif")
 colors = c("#29a329", "#cbcbcb", "#ffffff", "#086209", "#fdd327", "#064d06")
 names = c("Low vegetation", "Bare soil", "Cloud", "Forest 1", "Cropland", "Forest 2")
 clustering[[1]] = factor(clustering[[1]], labels = names)
-plot(clustering, main = NULL, col = colors)
+plot(clustering, main = NULL, col = colors, key.width = lcm(4))
 ```
