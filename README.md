@@ -1,5 +1,7 @@
 # Parallel raster processing in the {stars} package 
 
+![gif](gif.gif)
+
 The following tutorial demonstrates the parallel processing of huge (out-of-memory) raster
 data in the [**stars**](https://github.com/r-spatial/stars) package. The discussed example
 concerns the unsupervised classification of multispectral satellite images. The used technique
