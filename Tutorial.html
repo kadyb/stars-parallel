@@ -1504,7 +1504,7 @@ the <code>{ranger}</code> package (but this is not standard). In this
 situation, we have to parallelize the calculations ourselves. There are
 several approaches to do this, but for this example we will divide a
 large out of memory raster into smaller blocks and make predictions
-using multithreading.</p>
+using multiprocessing.</p>
 <div id="data-acquisition" class="section level2">
 <h2>Data acquisition</h2>
 <p>We will use the Landsat 8 satellite scene with four spectral bands as
@@ -1604,8 +1604,8 @@ head(tiles)</code></pre>
 ## [5,]  2049     1   2048   2048
 ## [6,]  2049  2049   2048   2048</code></pre>
 <p>Finally, the input raster will be divided into 16 smaller blocks. In
-the following sections, we will compare the performance of
-single-threaded and multi-threaded processing.</p>
+the following sections, we will compare the processing performance of
+one versus multiple processes.</p>
 <p>Now let’s discuss what steps we need to take to make a
 prediction:</p>
 <ol style="list-style-type: decimal">
@@ -1626,8 +1626,8 @@ the connection to the file and closes it each time, which causes
 overhead. With a large number of blocks, this can significantly affect
 performance. In this case, it is better to use a low-level API,
 e.g. <strong><a href="https://github.com/USDAForestService/gdalraster">gdalraster</a></strong>.</p>
-<div id="single-thread" class="section level3">
-<h3>Single thread</h3>
+<div id="single-process" class="section level3">
+<h3>Single process</h3>
 <pre class="r"><code>start_time = Sys.time()
 
 for (i in seq_len(nrow(tiles))) {
@@ -1643,30 +1643,30 @@ for (i in seq_len(nrow(tiles))) {
 
 end_time_1 = difftime(Sys.time(), start_time, units = &quot;secs&quot;)
 end_time_1 = round(end_time_1)</code></pre>
-<p>The prediction took 504 seconds.</p>
+<p>The prediction took 485 seconds.</p>
 </div>
-<div id="multiple-threads" class="section level3">
-<h3>Multiple threads</h3>
-<p>Multithreaded prediction is a bit more complicated. This requires the
+<div id="multiple-processes" class="section level3">
+<h3>Multiple processes</h3>
+<p>Multi-process prediction is a bit more complicated. This requires the
 use of two additional packages, i.e. <strong>foreach</strong> and
 <strong>doParallel</strong>. Now we need to setup a parallel backend by
-defining the number of available threads (or by detecting them
+defining the number of available cores (or by detecting them
 automatically using <code>detectCores()</code>) in
 <code>makeCluster()</code>, and then registering the cluster using the
 <code>registerDoParallel()</code> function. This can be accomplished,
 for instance, with:</p>
 <pre class="r"><code>library(&quot;foreach&quot;)
 library(&quot;doParallel&quot;)
-threads = 3 # specify number of threads
-cl = makeCluster(threads)
+cores = 3 # specify number of cores
+cl = makeCluster(cores)
 registerDoParallel(cl)</code></pre>
 <p>Once we have the computing cluster prepared, we can write a loop that
 will be executed in parallel. Instead of the standard <code>for()</code>
 loop, we will use <code>foreach()</code> with the <code>%dopar%</code>
 operator. In <code>foreach()</code> we need to define an iterator and
 packages that will be exported to each worker. Then we use the
-<code>%dopar%</code> operator and write the core of the function (it is
-identical as in the single-threaded example).</p>
+<code>%dopar%</code> operator and write the core of the function (is
+identical to the example using a single process).</p>
 <pre class="r"><code>packages = c(&quot;stars&quot;, &quot;mclust&quot;)
 
 start_time = Sys.time()
@@ -1685,7 +1685,7 @@ tifs = foreach(i = seq_len(nrow(tiles)), .packages = packages) %dopar% {
 
 end_time_2 = difftime(Sys.time(), start_time, units = &quot;secs&quot;)
 end_time_2 = round(end_time_2)</code></pre>
-<p>The prediction took 257 seconds. By using three threads instead of
+<p>The prediction took 252 seconds. By using three processes instead of
 one, we have cut the operation time by half!</p>
 </div>
 </div>

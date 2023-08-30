@@ -14,7 +14,7 @@ multithreading like `predict()` function in the `{ranger}` package (but this is
 not standard). In this situation, we have to parallelize the calculations
 ourselves. There are several approaches to do this, but for this example we will
 divide a large out of memory raster into smaller blocks and make predictions
-using multithreading.
+using multiprocessing.
 
 ## Data acquisition
 
@@ -120,8 +120,8 @@ head(tiles)
 ```
 
 Finally, the input raster will be divided into `r nrow(tiles)` smaller blocks.
-In the following sections, we will compare the performance of single-threaded
-and multi-threaded processing.
+In the following sections, we will compare the processing performance of one
+versus multiple processes.
 
 Now let's discuss what steps we need to take to make a prediction:
 
@@ -139,7 +139,7 @@ it each time, which causes overhead. With a large number of blocks, this can
 significantly affect performance. In this case, it is better to use a low-level
 API, e.g. **[gdalraster](https://github.com/USDAForestService/gdalraster)**.
 
-### Single thread
+### Single process
 
 ```{r}
 start_time = Sys.time()
@@ -161,11 +161,11 @@ end_time_1 = round(end_time_1)
 
 The prediction took `r as.integer(end_time_1)` seconds.
 
-### Multiple threads
+### Multiple processes
 
-Multithreaded prediction is a bit more complicated. This requires the use of
+Multi-process prediction is a bit more complicated. This requires the use of
 two additional packages, i.e. **foreach** and **doParallel**. Now we need to
-setup a parallel backend by defining the number of available threads (or by
+setup a parallel backend by defining the number of available cores (or by
 detecting them automatically using `detectCores()`) in `makeCluster()`, and then
 registering the cluster using the `registerDoParallel()` function. This can be
 accomplished, for instance, with:
@@ -173,8 +173,8 @@ accomplished, for instance, with:
 ```{r message=FALSE}
 library("foreach")
 library("doParallel")
-threads = 3 # specify number of threads
-cl = makeCluster(threads)
+cores = 3 # specify number of cores
+cl = makeCluster(cores)
 registerDoParallel(cl)
 ```
 
@@ -182,8 +182,8 @@ Once we have the computing cluster prepared, we can write a loop that will be
 executed in parallel. Instead of the standard `for()` loop, we will use `foreach()`
 with the `%dopar%` operator. In `foreach()` we need to define an iterator and
 packages that will be exported to each worker. Then we use the `%dopar%` operator
-and write the core of the function (it is identical as in the single-threaded
-example).
+and write the core of the function (is identical to the example using a single
+process).
 
 ```{r}
 packages = c("stars", "mclust")
@@ -206,7 +206,7 @@ end_time_2 = difftime(Sys.time(), start_time, units = "secs")
 end_time_2 = round(end_time_2)
 ```
 
-The prediction took `r as.integer(end_time_2)` seconds. By using three threads
+The prediction took `r as.integer(end_time_2)` seconds. By using three processes
 instead of one, we have cut the operation time by half!
 
 ## Post-processing
