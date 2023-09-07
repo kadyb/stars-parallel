@@ -1625,7 +1625,11 @@ temporary directory). Be sure to specify the missing values
 the connection to the file and closes it each time, which causes
 overhead. With a large number of blocks, this can significantly affect
 performance. In this case, it is better to use a low-level API,
-e.g. <strong><a href="https://github.com/USDAForestService/gdalraster">gdalraster</a></strong>.</p>
+e.g. <strong><a href="https://github.com/USDAForestService/gdalraster">gdalraster</a></strong>.
+The second difference between these packages is that
+<strong>gdalraster</strong> allows loading data stored as integers,
+while <strong>stars</strong> loads it as real (floating point) by
+default, so we can practically save half of the memory.</p>
 <div id="single-process" class="section level3">
 <h3>Single process</h3>
 <pre class="r"><code>start_time = Sys.time()
@@ -1643,7 +1647,7 @@ for (i in seq_len(nrow(tiles))) {
 
 end_time_1 = difftime(Sys.time(), start_time, units = &quot;secs&quot;)
 end_time_1 = round(end_time_1)</code></pre>
-<p>The prediction took 485 seconds.</p>
+<p>The prediction took 477 seconds.</p>
 </div>
 <div id="multiple-processes" class="section level3">
 <h3>Multiple processes</h3>
@@ -1685,7 +1689,7 @@ tifs = foreach(i = seq_len(nrow(tiles)), .packages = packages) %dopar% {
 
 end_time_2 = difftime(Sys.time(), start_time, units = &quot;secs&quot;)
 end_time_2 = round(end_time_2)</code></pre>
-<p>The prediction took 252 seconds. By using three processes instead of
+<p>The prediction took 245 seconds. By using three processes instead of
 one, we have cut the operation time by half!</p>
 </div>
 </div>

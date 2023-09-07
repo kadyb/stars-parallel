@@ -138,6 +138,9 @@ size as the input (`chunk_size = dim(tile)`).
 it each time, which causes overhead. With a large number of blocks, this can
 significantly affect performance. In this case, it is better to use a low-level
 API, e.g. **[gdalraster](https://github.com/USDAForestService/gdalraster)**.
+The second difference between these packages is that **gdalraster** allows
+loading data stored as integers, while **stars** loads it as real (floating point)
+by default, so we can practically save half of the memory.
 
 ### Single process
 
