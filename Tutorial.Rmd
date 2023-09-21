@@ -10,7 +10,7 @@ output:
 
 Prediction on large datasets can be time-consuming, but with enough computing 
 power, this task can be parallelized easily. Some algorithms provide native
-multithreading like `predict()` function in the `{ranger}` package (but this is
+multithreading like `predict()` function in the **ranger** package (but this is
 not standard). In this situation, we have to parallelize the calculations
 ourselves. There are several approaches to do this, but for this example we will
 divide a large out of memory raster into smaller blocks and make predictions
